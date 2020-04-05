@@ -1,0 +1,79 @@
+	<html>
+		<head>
+			<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+		 	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+		</head>
+
+		<body>
+		<script>
+			function parseCSV(csv){
+				lines = csv.split("\n")
+
+				header = lines[0]
+				alert(header)
+				hdr = header.split(",")
+
+				n = lines.map(function(d) {
+					result = {}
+					d.split(",").forEach( (val,i) => result[hdr[i]] = val)
+
+					return result
+				})
+
+				return n
+
+			}
+
+			$.ajax({ url: 'https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv', success: function(data) {
+				// Parse CSV
+				data = parseCSV(data)
+
+				// Fetch for the state of california
+				res = data.filter(function(d){
+					return (d["state"].localeCompare("California") == 0)
+				})
+
+				// Which counties are we interested in for now:
+				topical = ["San Mateo", "San Francisco", "Santa Clara"]
+
+				points = {}
+
+				res.forEach( d => {
+					county = d["county"]
+
+					if ( topical.includes(county)) {
+						if ( !(county in points)){
+							points[county] = {}
+							points[county]["x"] = []
+							points[county]["y"] = []
+							points[county]["name"] = county
+							points[county]["type"] = "scatter"
+						}
+						entry = points[county]
+
+						entry["x"].push(d["date"])
+						entry["y"].push(d["cases"])
+				}
+
+				}
+				)
+
+				series = Object.keys(points).map( function(d) {
+					return points[d]}
+				)
+
+				Plotly.newPlot("graph", series)
+
+				outp= document.getElementById("time")
+				outp.innerHTML = counties.map(function f(d) {
+					return d["county"]
+				})
+
+
+		} });
+	</script>
+
+	<div id="graph" style="width:800px;height:500px;"></div>
+	<div id="time"></div>
+	</body>
+</html>
